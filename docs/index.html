@@ -1,1 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kochi Metro AI Train Induction Scheduler</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🚆 Kochi Metro - AI Train Induction Scheduler</h1>
+    <p class="subtitle">Smart India Hackathon 2024 - AI-Powered Fleet Management</p>
 
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('schedule')">Schedule Induction</button>
+      <button class="tab-btn" onclick="showTab('optimize')">AI Fleet Optimizer</button>
+      <button class="tab-btn" onclick="showTab('analytics')">Analytics Dashboard</button>
+    </div>
+
+    <!-- Schedule Tab -->
+    <div id="schedule" class="tab-content active">
+      <form id="scheduleForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="trainId">Train Number:</label>
+            <select id="trainId" required>
+              <option value="">Select Train</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="station">Station:</label>
+            <select id="station" required>
+              <option value="">Select Station</option>
+              <option>Aluva</option>
+              <option>Pulinchodu</option>
+              <option>Companypady</option>
+              <option>Kalamassery</option>
+              <option>Edapally</option>
+              <option>Palarivattom</option>
+              <option>MG Road</option>
+              <option>Maharaja's College</option>
+              <option>Vyttila</option>
+              <option>Elamkulam</option>
+              <option>SN Junction</option>
+              <option>Thripunithura</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="route">Route:</label>
+            <select id="route" required>
+              <option value="">Select Route</option>
+              <option>Aluva - Petta</option>
+              <option>SN Junction - Thripunithura</option>
+              <option>Kalamassery - Maharaja's College</option>
+              <option>Edapally - Kaloor</option>
+              <option>Palarivattom - Vyttila</option>
+              <option>MG Road - Elamkulam</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="date">Induction Date:</label>
+            <input type="date" id="date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="time">Induction Time:</label>
+            <input type="time" id="time" required />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">🚀 Generate AI Schedule</button>
+      </form>
+
+      <div class="output" id="aiOutput" style="display: none;">
+        <h3>AI-Optimized Induction Plan</h3>
+        <div id="result"></div>
+        <div id="conflicts" class="conflicts"></div>
+      </div>
+    </div>
+
+    <!-- AI Optimizer Tab -->
+    <div id="optimize" class="tab-content">
+      <div class="optimizer-controls">
+        <label for="optimizeDate">Target Date:</label>
+        <input type="date" id="optimizeDate" />
+        <button onclick="runAIOptimization()" class="btn-primary">🤖 Run AI Optimization</button>
+      </div>
+      
+      <div id="optimizationResults" class="optimization-results"></div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div id="analytics" class="tab-content">
+      <div class="analytics-grid">
+        <div class="metric-card">
+          <h3>Fleet Status</h3>
+          <div id="fleetMetrics"></div>
+        </div>
+        
+        <div class="metric-card">
+          <h3>AI Recommendations</h3>
+          <div id="aiMetrics"></div>
+        </div>
+        
+        <div class="metric-card">
+          <h3>Conflict Analysis</h3>
+          <div id="conflictMetrics"></div>
+        </div>
+      </div>
+      
+      <button onclick="loadAnalytics()" class="btn-primary">📊 Refresh Analytics</button>
+    </div>
+
+    <!-- Schedules Dashboard -->
+    <div class="dashboard">
+      <h3>📊 Train Induction Dashboard</h3>
+      <table id="scheduleTable">
+        <thead>
+          <tr>
+            <th>Train ID</th>
+            <th>Station</th>
+            <th>Route</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>AI Score</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Train Details Modal -->
+    <div id="trainModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Train Details & AI Analysis</h2>
+        <div id="trainDetails"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
