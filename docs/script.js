@@ -2,11 +2,29 @@ const API_BASE = window.API_CONFIG.API_BASE;
 
 // Initialize app
 window.addEventListener('DOMContentLoaded', async () => {
-  await loadTrains();
+  console.log('App initializing...');
+  console.log('API_CONFIG:', window.API_CONFIG);
+  
+  // Retry loading trains if it fails
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      await loadTrains();
+      break;
+    } catch (error) {
+      console.log(`Train loading failed, retries left: ${retries - 1}`);
+      retries--;
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+  }
+  
   await loadSchedules();
   await loadAnalytics();
   setupModal();
   setDefaultDate();
+  console.log('App initialized successfully');
 });
 
 function setDefaultDate() {
@@ -27,16 +45,39 @@ function showTab(tabName) {
 // Load trains dynamically
 async function loadTrains() {
   try {
+    console.log('Loading trains from:', API_BASE);
     const response = await fetch(`${API_BASE}/trains`);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
     const trains = await response.json();
+    console.log('Trains loaded:', trains);
     const select = document.getElementById('trainId');
+    if (!select) {
+      console.error('Train select element not found');
+      return;
+    }
     select.innerHTML = '<option value="">Select Train</option>';
     trains.forEach(train => {
       const status = train.inIBL ? ' (IBL)' : '';
       select.innerHTML += `<option value="${train.trainId}">${train.trainId}${status}</option>`;
     });
+    console.log('Train dropdown populated successfully');
   } catch (error) {
     console.error('Failed to load trains:', error);
+    // Fallback: Add trains manually if API fails
+    const select = document.getElementById('trainId');
+    if (select) {
+      select.innerHTML = `
+        <option value="">Select Train</option>
+        <option value="KMTR-045">KMTR-045</option>
+        <option value="KMTR-102">KMTR-102</option>
+        <option value="KMTR-221">KMTR-221</option>
+        <option value="KMTR-310">KMTR-310 (IBL)</option>
+        <option value="KMTR-412">KMTR-412</option>
+      `;
+      console.log('Used fallback train options');
+    }
   }
 }
 
