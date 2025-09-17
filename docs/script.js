@@ -1,31 +1,66 @@
-const API_BASE = window.API_CONFIG.API_BASE;
+// Get API_BASE with fallback
+function getApiBase() {
+  if (window.API_CONFIG && window.API_CONFIG.API_BASE) {
+    return window.API_CONFIG.API_BASE;
+  }
+  // Fallback based on hostname
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000/api'
+    : 'https://sih80.onrender.com/api';
+}
+
+// Use getApiBase() directly to avoid clashing with config.js's API_BASE
 
 // Initialize app
 window.addEventListener('DOMContentLoaded', async () => {
   console.log('App initializing...');
-  console.log('API_CONFIG:', window.API_CONFIG);
+  console.log('API_BASE:', getApiBase());
   
-  // Retry loading trains if it fails
-  let retries = 3;
-  while (retries > 0) {
-    try {
-      await loadTrains();
-      break;
-    } catch (error) {
-      console.log(`Train loading failed, retries left: ${retries - 1}`);
-      retries--;
-      if (retries > 0) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
+  // Immediately populate trains with fallback
+  populateTrainsFallback();
+  
+  // Try to load from API in background (non-blocking)
+  loadTrains().catch(error => {
+    console.log('API load failed, keeping fallback trains:', error);
+  });
+  
+  // Load other data
+  try {
+    await loadSchedules();
+    await loadAnalytics();
+  } catch (error) {
+    console.error('Failed to load some data:', error);
   }
   
-  await loadSchedules();
-  await loadAnalytics();
   setupModal();
   setDefaultDate();
   console.log('App initialized successfully');
 });
+
+// Immediate fallback train population
+function populateTrainsFallback() {
+  const select = document.getElementById('trainId');
+  if (select) {
+    select.innerHTML = `
+      <option value="">Select Train</option>
+      <option value="KMTR-045">KMTR-045</option>
+      <option value="KMTR-102">KMTR-102</option>
+      <option value="KMTR-221">KMTR-221</option>
+      <option value="KMTR-310">KMTR-310 (IBL)</option>
+      <option value="KMTR-412">KMTR-412</option>
+    `;
+    console.log('Fallback trains populated immediately');
+  }
+}
+
+// Safety check to ensure dropdown has options
+function ensureDropdownHasOptions() {
+  const select = document.getElementById('trainId');
+  if (select && select.options.length <= 1) {
+    console.log('Dropdown is empty, restoring fallback options');
+    populateTrainsFallback();
+  }
+}
 
 function setDefaultDate() {
   const today = new Date().toISOString().split('T')[0];
@@ -45,13 +80,14 @@ function showTab(tabName) {
 // Load trains dynamically
 async function loadTrains() {
   try {
-    console.log('Loading trains from:', API_BASE);
-    const response = await fetch(`${API_BASE}/trains`);
+    const apiBase = getApiBase();
+    console.log('Loading trains from:', apiBase);
+    const response = await fetch(`${apiBase}/trains`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
     const trains = await response.json();
-    console.log('Trains loaded:', trains);
+    console.log('Trains loaded from API:', trains);
     const select = document.getElementById('trainId');
     if (!select) {
       console.error('Train select element not found');
@@ -62,29 +98,19 @@ async function loadTrains() {
       const status = train.inIBL ? ' (IBL)' : '';
       select.innerHTML += `<option value="${train.trainId}">${train.trainId}${status}</option>`;
     });
-    console.log('Train dropdown populated successfully');
+    console.log('Train dropdown updated from API successfully');
   } catch (error) {
-    console.error('Failed to load trains:', error);
-    // Fallback: Add trains manually if API fails
-    const select = document.getElementById('trainId');
-    if (select) {
-      select.innerHTML = `
-        <option value="">Select Train</option>
-        <option value="KMTR-045">KMTR-045</option>
-        <option value="KMTR-102">KMTR-102</option>
-        <option value="KMTR-221">KMTR-221</option>
-        <option value="KMTR-310">KMTR-310 (IBL)</option>
-        <option value="KMTR-412">KMTR-412</option>
-      `;
-      console.log('Used fallback train options');
-    }
+    console.error('Failed to load trains from API:', error);
+    // Restore fallback trains if API fails
+    console.log('Restoring fallback train options due to API failure');
+    populateTrainsFallback();
   }
 }
 
 // Load schedules
 async function loadSchedules() {
   try {
-    const response = await fetch(`${API_BASE}/schedules`);
+    const response = await fetch(`${getApiBase()}/schedules`);
     const schedules = await response.json();
     const tbody = document.querySelector('#scheduleTable tbody');
     tbody.innerHTML = '';
@@ -135,6 +161,9 @@ function getStatusText(score) {
 document.getElementById("scheduleForm").addEventListener("submit", async function (e) {
   e.preventDefault();
   
+  // Ensure dropdown has options before validation
+  ensureDropdownHasOptions();
+  
   const trainId = document.getElementById("trainId").value;
   const station = document.getElementById("station").value;
   const route = document.getElementById("route").value;
@@ -147,7 +176,7 @@ document.getElementById("scheduleForm").addEventListener("submit", async functio
   }
 
   try {
-    const response = await fetch(`${API_BASE}/schedule`, {
+    const response = await fetch(`${getApiBase()}/schedule`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -211,7 +240,7 @@ async function runAIOptimization() {
   }
 
   try {
-    const response = await fetch(`${API_BASE}/ai/optimize`, {
+    const response = await fetch(`${getApiBase()}/ai/optimize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ date })
@@ -269,8 +298,8 @@ function displayOptimizationResults(result) {
 async function loadAnalytics() {
   try {
     const [trainsRes, schedulesRes] = await Promise.all([
-      fetch(`${API_BASE}/trains`),
-      fetch(`${API_BASE}/schedules`)
+      fetch(`${getApiBase()}/trains`),
+      fetch(`${getApiBase()}/schedules`)
     ]);
 
     const trains = await trainsRes.json();
@@ -328,10 +357,10 @@ function displayConflictMetrics(schedules) {
 // Train Details Modal
 async function viewTrainDetails(trainId) {
   try {
-    const response = await fetch(`${API_BASE}/trains/${trainId}/details`);
+    const response = await fetch(`${getApiBase()}/trains/${trainId}/details`);
     const train = await response.json();
     
-    const computeResponse = await fetch(`${API_BASE}/compute`, {
+    const computeResponse = await fetch(`${getApiBase()}/compute`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ trainId })
