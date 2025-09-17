@@ -17,8 +17,8 @@
    - **Instance Type**: `Free`
 
 ### 3. Get Backend URL
-- After deployment, copy the URL (e.g., `https://kochi-metro-ai-backend.onrender.com`)
-- Update `script.js` line 3 with your actual Render URL
+- After deployment, copy the URL (e.g., `https://sih80.onrender.com`)
+- Update `docs/config.js` with your actual Render URL
 
 ## Frontend Deployment (GitHub Pages)
 
@@ -40,7 +40,7 @@ git push -u origin main
 6. Click **Save**
 
 ### 3. Update API URL
-1. Replace `your-render-app.onrender.com` in `docs/script.js` with your actual Render URL
+1. Replace `your-render-app.onrender.com` in `docs/config.js` with your actual Render URL
 2. Replace `your-github-username.github.io` in `app.py` CORS settings with your GitHub Pages URL
 
 ## Configuration Steps
@@ -51,15 +51,17 @@ git push -u origin main
 CORS(app, origins=['https://YOUR_USERNAME.github.io'])
 ```
 
-### Frontend (docs/script.js)
+### Frontend (docs/config.js)
 ```javascript
 // Update API_BASE with your Render URL
-const API_BASE = 'https://YOUR_RENDER_APP.onrender.com/api';
+production: {
+  API_BASE: 'https://YOUR_RENDER_APP.onrender.com/api'
+}
 ```
 
 ## Testing
-1. **Backend**: Visit `https://YOUR_RENDER_APP.onrender.com/api/trains`
-2. **Frontend**: Visit `https://YOUR_USERNAME.github.io/REPO_NAME`
+1. **Backend**: Visit `https://sih80.onrender.com/api/trains`
+2. **Frontend**: Visit `https://codetanishq2211.github.io/SIH80`
 
 ## Files Structure
 ```

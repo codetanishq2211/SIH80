@@ -39,8 +39,8 @@ python app.py
 ```
 
 ### Live Demo
-- **Frontend**: [GitHub Pages URL]
-- **Backend API**: [Render URL]
+- **Frontend**: [https://codetanishq2211.github.io/SIH80](https://codetanishq2211.github.io/SIH80)
+- **Backend API**: [https://sih80.onrender.com](https://sih80.onrender.com)
 
 > 📋 **Deployment Guide**: See [DEPLOYMENT.md](DEPLOYMENT.md) for hosting instructions
 

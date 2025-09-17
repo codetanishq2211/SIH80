@@ -7,7 +7,7 @@ import random
 import os
 
 app = Flask(__name__)
-CORS(app, origins=['https://your-github-username.github.io', 'http://localhost:3000', 'http://127.0.0.1:5500'])
+CORS(app, origins=['https://codetanishq2211.github.io', 'http://localhost:3000', 'http://127.0.0.1:5500'])
 
 # --- Enhanced Data Models for SIH Variables ---
 TRAINS = [
